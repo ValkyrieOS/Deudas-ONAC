@@ -5,5 +5,19 @@
     "pagadoActualmente": 20000,
     "cantidadAPagar": 385000,
     "prestamista": "Glazzier"
+  },
+  {
+    "usuario": "alexguai2012",
+    "deudaTotal": 200000,
+    "pagadoActualmente": 0,
+    "cantidadAPagar": 220000,
+    "prestamista": "Glazzier"
+  },
+  {
+    "usuario": "Juan1990",
+    "deudaTotal": 200000,
+    "pagadoActualmente": 0,
+    "cantidadAPagar": 220000,
+    "prestamista": "Glazzier"
   }
 ]
