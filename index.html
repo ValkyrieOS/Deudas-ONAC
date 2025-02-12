@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ONAC Préstamos</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      @keyframes fillAnimation {
+        0% {
+          width: 0;
+        }
+      }
+      body {
+        font-family: "Inter", sans-serif;
+      }
+      .glass-effect {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+      }
+    </style>
+  </head>
+  <body
+    class="bg-gradient-to-br from-gray-900 via-blue-950 to-indigo-900 text-gray-100 min-h-screen"
+  >
+    <div class="container mx-auto px-4 py-12">
+      <h1
+        class="text-4xl md:text-5xl lg:text-6xl font-bold mb-12 text-center text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-300"
+      >
+        ONAC Préstamos
+      </h1>
+      <div
+        id="listaPrestamos"
+        class="grid gap-8 sm:grid-cols-2 lg:grid-cols-3"
+      ></div>
+    </div>
+
+    <script>
+      fetch("data/prestamos.json")
+        .then((response) => response.json())
+        .then((datosPrestamos) => {
+          const listaPrestamos = document.getElementById("listaPrestamos");
+
+          datosPrestamos.forEach((prestamo) => {
+            const porcentaje =
+              (prestamo.pagadoActualmente / prestamo.cantidadAPagar) * 100;
+            const elementoPrestamo = document.createElement("div");
+            elementoPrestamo.className =
+              "glass-effect rounded-3xl p-8 shadow-lg transition-all duration-300 hover:shadow-indigo-500/20 hover:shadow-xl";
+            elementoPrestamo.innerHTML = `
+                        <div class="flex justify-between items-center mb-6">
+                            <h2 class="text-2xl font-semibold">${
+                              prestamo.usuario
+                            }</h2>
+                            <span class="text-sm font-medium px-3 py-1 bg-indigo-500/20 rounded-full">Prestamista: ${
+                              prestamo.prestamista
+                            }</span>
+                        </div>
+                        <div class="space-y-4 mb-8">
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-400 text-sm">Deuda Total</span>
+                                <span class="text-lg font-medium">€${prestamo.deudaTotal.toLocaleString(
+                                  "es-ES"
+                                )}</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-400 text-sm">Cantidad a Pagar</span>
+                                <span class="text-lg font-medium">€${prestamo.cantidadAPagar.toLocaleString(
+                                  "es-ES"
+                                )}</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-400 text-sm">Pagado Actualmente</span>
+                                <span class="text-lg font-medium">€${prestamo.pagadoActualmente.toLocaleString(
+                                  "es-ES"
+                                )}</span>
+                            </div>
+                        </div>
+                        <div class="relative pt-1">
+                            <div class="overflow-hidden h-3 mb-4 text-xs flex rounded-full bg-gray-700">
+                                <div style="width:${porcentaje}%" class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-gradient-to-r from-indigo-400 to-blue-500 rounded-full transition-all duration-1000 ease-out" data-porcentaje="${porcentaje}"></div>
+                            </div>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm text-gray-400">Progreso</span>
+                            <span class="text-sm font-medium text-indigo-400">
+                                ${porcentaje.toFixed(1)}% Completado
+                            </span>
+                        </div>
+                    `;
+            listaPrestamos.appendChild(elementoPrestamo);
+          });
+
+          // Animar barras de progreso
+          setTimeout(() => {
+            document.querySelectorAll("[data-porcentaje]").forEach((barra) => {
+              const porcentaje = barra.getAttribute("data-porcentaje");
+              barra.style.animation = `fillAnimation 1.5s ease-out forwards`;
+            });
+          }, 300);
+        });
+    </script>
+  </body>
+</html>
