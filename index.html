@@ -9,19 +9,63 @@
       href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
       rel="stylesheet"
     />
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
     <style>
       @keyframes fillAnimation {
-        0% {
-          width: 0;
-        }
+        0% { width: 0; transform: scaleX(0); }
+        100% { width: var(--target-width); transform: scaleX(1); }
+      }
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px) scale(0.95); }
+        to { opacity: 1; transform: translateY(0) scale(1); }
+      }
+      @keyframes float {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-10px); }
       }
       body {
         font-family: "Inter", sans-serif;
+        background-size: 400% 400%;
+        animation: gradientBG 15s ease infinite;
+        position: relative;
+        overflow-x: hidden;
+      }
+      #particles-js {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 0;
+      }
+      .container {
+        position: relative;
+        z-index: 1;
+      }
+      @keyframes gradientBG {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
       }
       .glass-effect {
-        background: rgba(255, 255, 255, 0.05);
-        backdrop-filter: blur(12px);
-        border: 1px solid rgba(255, 255, 255, 0.1);
+        background: rgba(255, 255, 255, 0.08);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+        transition: all 0.3s ease;
+      }
+      .glass-effect:hover {
+        background: rgba(255, 255, 255, 0.1);
+        transform: translateY(-8px);
+        box-shadow: 0 12px 48px 0 rgba(31, 38, 135, 0.3);
+      }
+      .card-animate {
+        animation: fadeIn 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+      }
+      .progress-bar {
+        transition: all 1s cubic-bezier(0.4, 0, 0.2, 1);
+        transform-origin: left;
+        box-shadow: 0 0 15px rgba(79, 70, 229, 0.3);
       }
     </style>
   </head>
@@ -30,79 +74,86 @@
   >
     <div class="container mx-auto px-4 py-12">
       <h1
-        class="text-4xl md:text-5xl lg:text-6xl font-bold mb-12 text-center text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-300"
+        class="text-5xl md:text-6xl lg:text-7xl font-bold mb-16 text-center text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-400 tracking-tight"
       >
         ONAC Préstamos
       </h1>
       <div
         id="listaPrestamos"
-        class="grid gap-8 sm:grid-cols-2 lg:grid-cols-3"
+        class="grid gap-8 sm:grid-cols-2 lg:grid-cols-3 px-4"
       ></div>
     </div>
 
     <script>
-      fetch("data/prestamos.json")
+      fetch("/data/prestamos.json")
         .then((response) => response.json())
         .then((datosPrestamos) => {
           const listaPrestamos = document.getElementById("listaPrestamos");
 
-          datosPrestamos.forEach((prestamo) => {
+          datosPrestamos.forEach((prestamo, index) => {
             const porcentaje =
               (prestamo.pagadoActualmente / prestamo.cantidadAPagar) * 100;
             const elementoPrestamo = document.createElement("div");
             elementoPrestamo.className =
-              "glass-effect rounded-3xl p-8 shadow-lg transition-all duration-300 hover:shadow-indigo-500/20 hover:shadow-xl";
+              "glass-effect rounded-3xl p-8 shadow-lg transition-all duration-500 hover:shadow-indigo-500/30 hover:shadow-2xl hover:translate-y-[-4px] card-animate";
+            elementoPrestamo.style.animationDelay = `${index * 150}ms`;
+            
             elementoPrestamo.innerHTML = `
-                        <div class="flex justify-between items-center mb-6">
-                            <h2 class="text-2xl font-semibold">${
-                              prestamo.usuario
-                            }</h2>
-                            <span class="text-sm font-medium px-3 py-1 bg-indigo-500/20 rounded-full">Prestamista: ${
-                              prestamo.prestamista
-                            }</span>
-                        </div>
-                        <div class="space-y-4 mb-8">
-                            <div class="flex justify-between items-center">
-                                <span class="text-gray-400 text-sm">Deuda Total</span>
-                                <span class="text-lg font-medium">€${prestamo.deudaTotal.toLocaleString(
-                                  "es-ES"
-                                )}</span>
-                            </div>
-                            <div class="flex justify-between items-center">
-                                <span class="text-gray-400 text-sm">Cantidad a Pagar</span>
-                                <span class="text-lg font-medium">€${prestamo.cantidadAPagar.toLocaleString(
-                                  "es-ES"
-                                )}</span>
-                            </div>
-                            <div class="flex justify-between items-center">
-                                <span class="text-gray-400 text-sm">Pagado Actualmente</span>
-                                <span class="text-lg font-medium">€${prestamo.pagadoActualmente.toLocaleString(
-                                  "es-ES"
-                                )}</span>
-                            </div>
-                        </div>
-                        <div class="relative pt-1">
-                            <div class="overflow-hidden h-3 mb-4 text-xs flex rounded-full bg-gray-700">
-                                <div style="width:${porcentaje}%" class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-gradient-to-r from-indigo-400 to-blue-500 rounded-full transition-all duration-1000 ease-out" data-porcentaje="${porcentaje}"></div>
-                            </div>
-                        </div>
-                        <div class="flex justify-between items-center">
-                            <span class="text-sm text-gray-400">Progreso</span>
-                            <span class="text-sm font-medium text-indigo-400">
-                                ${porcentaje.toFixed(1)}% Completado
-                            </span>
-                        </div>
-                    `;
+              <div class="flex justify-between items-center mb-8">
+                <h2 class="text-2xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">${
+                  prestamo.usuario
+                }</h2>
+                <span class="text-sm font-medium px-4 py-2 bg-indigo-500/30 rounded-full border border-indigo-500/20">
+                  <span class="text-indigo-300">Prestamista:</span> ${prestamo.prestamista}
+                </span>
+              </div>
+              <div class="space-y-6 mb-8">
+                <div class="flex justify-between items-center p-3 rounded-lg bg-white/5 transition-all duration-300 hover:bg-white/10">
+                  <span class="text-gray-300 text-sm font-medium">Deuda Total</span>
+                  <span class="text-lg font-semibold">€${prestamo.deudaTotal.toLocaleString(
+                    "es-ES"
+                  )}</span>
+                </div>
+                <div class="flex justify-between items-center p-3 rounded-lg bg-white/5 transition-all duration-300 hover:bg-white/10">
+                  <span class="text-gray-300 text-sm font-medium">Cantidad a Pagar</span>
+                  <span class="text-lg font-semibold">€${prestamo.cantidadAPagar.toLocaleString(
+                    "es-ES"
+                  )}</span>
+                </div>
+                <div class="flex justify-between items-center p-3 rounded-lg bg-white/5 transition-all duration-300 hover:bg-white/10">
+                  <span class="text-gray-300 text-sm font-medium">Pagado Actualmente</span>
+                  <span class="text-lg font-semibold text-indigo-300">€${prestamo.pagadoActualmente.toLocaleString(
+                    "es-ES"
+                  )}</span>
+                </div>
+              </div>
+              <div class="relative pt-1">
+                <div class="overflow-hidden h-4 mb-4 text-xs flex rounded-full bg-gray-700/50">
+                  <div 
+                    class="progress-bar shadow-lg flex flex-col text-center whitespace-nowrap text-white justify-center bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 rounded-full" 
+                    style="width: 0%" 
+                    data-porcentaje="${porcentaje}"
+                  ></div>
+                </div>
+              </div>
+              <div class="flex justify-between items-center mt-2">
+                <span class="text-sm font-medium text-gray-300">Progreso</span>
+                <span class="text-sm font-bold text-indigo-300">
+                  ${porcentaje.toFixed(1)}% Completado
+                </span>
+              </div>
+            `;
             listaPrestamos.appendChild(elementoPrestamo);
           });
 
           // Animar barras de progreso
           setTimeout(() => {
-            document.querySelectorAll("[data-porcentaje]").forEach((barra) => {
+            document.querySelectorAll(".progress-bar").forEach((barra) => {
               const porcentaje = barra.getAttribute("data-porcentaje");
-              barra.style.animation = `fillAnimation 1.5s ease-out forwards`;
+              barra.style.setProperty("--target-width", `${porcentaje}%`);
+              barra.style.width = `${porcentaje}%`;
             });
-          }, 300);
+          }, 500);
         });
     </script>
   </body>
